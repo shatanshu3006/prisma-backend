@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+//Partial writes occur when only part of a database operation is successfully completed, leaving the data in an inconsistent or incomplete state. This can happen, for example, in a situation where a complex operation involves multiple steps or queries, and one or more of those steps fails after others have already been completed.
+//By using MongoDB transactions, Prisma ensures that all parts of a nested operation either succeed together or fail together. If any part of the operation fails, the transaction can be rolled back, preventing partial writes and maintaining the integrity of the data.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  name      String?   // ? implies optional string
+  email     String @unique
+  password  String 
+  posts Post[]
+}
+
+model Post {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  slug      String
+  title     String
+  body      String
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId String @db.ObjectId
+}
+
+// Key points about a slug:
+
+// 	1.	SEO-Friendly: Slugs are often used in URLs to improve search engine optimization (SEO) by making the URL more descriptive and easier to read for both users and search engines.
+// 	2.	Unique Identifier in URL: Slugs are unique within the context of their resource, ensuring that each post has a distinct URL that is easy to share and identify, like /posts/introduction-to-prisma-orm.
+
